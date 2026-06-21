@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>平原について</title>
+
+  <!-- Twitter / OGP（Author が設定。GitHub 公開前に必ず更新） -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="平原について">
+  <meta property="og:description" content="（著者名を入力）">
+  <meta property="og:image" content="images/cover.svg">
+  <meta property="og:url" content="">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="平原について">
+  <meta name="twitter:description" content="（著者名を入力）">
+  <meta name="twitter:image" content="images/cover.svg">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    :root {
+      --bg: #f6f5f0;
+      --ink-muted: #aaa;
+      --ink: #111;
+      --panel: #fff;
+      --border: #e2e0d8;
+      --accent: #1a1a1a;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+      background: var(--bg);
+      color: var(--ink-muted);
+      line-height: 2;
+    }
+
+    .ui-font {
+      font-family: "Hiragino Sans", "Yu Gothic", sans-serif;
+    }
+
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    header h1 {
+      margin: 0 0 4px;
+      font-size: 1.15rem;
+      color: #333;
+    }
+
+    .book-meta-line {
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    nav#mode-tabs {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    nav#mode-tabs button {
+      border: 1px solid var(--border);
+      background: #fafafa;
+      padding: 8px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    nav#mode-tabs button.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 28px 20px 160px;
+    }
+
+    .panel {
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    /* ===== Author ===== */
+    .author-block {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      margin-bottom: 20px;
+    }
+
+    .author-block h2 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+      color: #444;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    input[type="url"],
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+    }
+
+    textarea#author-text {
+      min-height: 280px;
+      font-family: Consolas, "Courier New", monospace;
+      line-height: 1.6;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .toolbar button,
+    .btn {
+      border: 1px solid var(--border);
+      background: #fafafa;
+      padding: 7px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .hint {
+      font-size: 0.82rem;
+      color: #777;
+      line-height: 1.6;
+      margin: 8px 0 0;
+    }
+
+    code {
+      background: #eee;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 0.85em;
+    }
+
+    .author-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    /* ===== Reader prose ===== */
+    #reader-view .prose-flow {
+      color: var(--ink-muted);
+    }
+
+    #reader-view .prose-flow p {
+      margin: 0 0 1.4em;
+      text-indent: 1em;
+    }
+
+    #reader-view .prose-flow p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* プレイリスト連続表示 — 区切りなく1ページのように */
+    #reader-view.playlist-mode .prose-flow p {
+      margin-bottom: 0;
+      text-indent: 0;
+    }
+
+    #reader-view.playlist-mode .prose-flow p + p::before {
+      content: "";
+    }
+
+    #reader-view.playlist-mode .prose-flow p:first-child {
+      text-indent: 1em;
+    }
+
+    strong { color: var(--ink); font-weight: 700; }
+
+    .bouten {
+      text-emphasis: filled dot;
+      text-emphasis-position: over;
+      -webkit-text-emphasis: filled dot;
+      -webkit-text-emphasis-position: over;
+      color: var(--ink);
+    }
+
+    mark.shared-highlight {
+      background: #fff6bf;
+      color: var(--ink);
+      padding: 0.05em 0;
+    }
+
+    /* ===== Playlist sidebar ===== */
+    .reader-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    @media (min-width: 900px) {
+      main.reader-main {
+        max-width: 980px;
+      }
+      .reader-layout {
+        grid-template-columns: 1fr 260px;
+      }
+    }
+
+    .playlist-panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      height: fit-content;
+      position: sticky;
+      top: 100px;
+    }
+
+    .playlist-panel h3 {
+      margin: 0 0 10px;
+      font-size: 0.95rem;
+      color: #444;
+    }
+
+    #playlist-items {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 12px;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+
+    #playlist-items li {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 0.82rem;
+      color: #555;
+    }
+
+    #playlist-items li span.snippet {
+      flex: 1;
+      line-height: 1.4;
+    }
+
+    #playlist-items button {
+      border: none;
+      background: none;
+      color: #999;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0 4px;
+    }
+
+    .reader-tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    /* ===== Share bar ===== */
+    #share-bar {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #222;
+      color: #fff;
+      padding: 14px 18px;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.25);
+      width: min(640px, calc(100% - 32px));
+      z-index: 60;
+    }
+
+    #share-bar.visible { display: block; }
+
+    #share-bar label {
+      color: #bbb;
+      font-size: 0.78rem;
+      margin-bottom: 6px;
+    }
+
+    #share-url {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #555;
+      border-radius: 6px;
+      background: #111;
+      color: #7fd4ff;
+      font-size: 0.82rem;
+      font-family: Consolas, monospace;
+      margin-bottom: 10px;
+    }
+
+    #share-bar .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    #share-bar .actions button,
+    #share-bar .actions a {
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    #copy-btn { background: #fff; color: #222; }
+    #open-link { background: #444; color: #ddd; display: inline-flex; align-items: center; }
+
+    .preview-card {
+      margin-top: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      max-width: 400px;
+    }
+
+    .preview-card img {
+      width: 100%;
+      display: block;
+      aspect-ratio: 1.91 / 1;
+      object-fit: cover;
+      background: #ddd;
+    }
+
+    .preview-card .card-text {
+      padding: 10px 12px;
+      background: #fafafa;
+    }
+
+    .preview-card .card-title {
+      font-weight: bold;
+      color: #111;
+      font-size: 0.9rem;
+    }
+
+    .preview-card .card-author {
+      color: #666;
+      font-size: 0.82rem;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="ui-font">
+    <h1 id="header-title">Fishbowler</h1>
+    <div class="book-meta-line"><span id="header-book"></span></div>
+    <nav id="mode-tabs">
+      <button type="button" data-mode="reader" class="active">Reader（読む）</button>
+      <button type="button" data-mode="author">Author（編集）</button>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    <!-- ===== AUTHOR ===== -->
+    <section id="author-panel" class="panel ui-font">
+      <div class="author-block">
+        <h2>書籍情報（Twitter / OGP カード用）</h2>
+        <label for="book-title">著書名</label>
+        <input type="text" id="book-title" placeholder="例：平原について">
+        <label for="book-author">著者名</label>
+        <input type="text" id="book-author" placeholder="例：山田太郎">
+        <label for="book-image">共有用画像 URL（1200×630px 推奨）</label>
+        <input type="url" id="book-image" placeholder="images/cover.jpg">
+        <div class="preview-card">
+          <img id="preview-image" src="images/cover.svg" alt="">
+          <div class="card-text">
+            <div class="card-title" id="preview-title">著書名</div>
+            <div class="card-author" id="preview-author">著者名</div>
+          </div>
+        </div>
+        <p class="hint">X（Twitter）や LINE でリンクを貼ったとき、Spotify のように<strong>画像＋著書名＋著者</strong>が表示されます。GitHub 公開前に「設定を反映して保存」を押してください。</p>
+      </div>
+
+      <div class="author-block">
+        <h2>本文の編集</h2>
+        <div class="toolbar">
+          <button type="button" id="cmd-bold" title="太字"><strong>太字</strong></button>
+          <button type="button" id="cmd-bouten" title="傍点">傍点</button>
+          <button type="button" id="cmd-import">テキストファイル読込</button>
+          <input type="file" id="file-import" accept=".txt,.json" hidden>
+        </div>
+        <p class="hint">
+          書式コマンド：<code>**太字**</code>　<code>{{傍点}}</code><br>
+          空行で段落を区切ります。
+        </p>
+        <textarea id="author-text"></textarea>
+        <div class="author-actions">
+          <button type="button" class="btn btn-primary" id="btn-save">設定を反映して保存</button>
+          <button type="button" class="btn" id="btn-export-json">book.json をダウンロード</button>
+          <button type="button" class="btn" id="btn-export-html">GitHub用 index.html をダウンロード</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== READER ===== -->
+    <section id="reader-panel" class="panel active">
+      <div class="reader-layout">
+        <div id="reader-view">
+          <div class="reader-tools ui-font">
+            <button type="button" class="btn" id="btn-add-playlist">選択範囲をプレイリストに追加</button>
+            <button type="button" class="btn" id="btn-show-full">全文表示</button>
+            <button type="button" class="btn btn-primary" id="btn-show-playlist">プレイリスト表示</button>
+          </div>
+          <article id="prose-body" class="prose-flow"></article>
+        </div>
+
+        <aside class="playlist-panel ui-font">
+          <h3>プレイリスト</h3>
+          <ul id="playlist-items"></ul>
+          <button type="button" class="btn" id="btn-clear-playlist">リストを空にする</button>
+          <button type="button" class="btn" id="btn-share-playlist">プレイリストURLをコピー</button>
+          <p class="hint">複数の抜粋が、1ページの連続した段落のように繋がって表示されます。</p>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <div id="share-bar" class="ui-font">
+    <label for="share-url">共有用URL</label>
+    <input id="share-url" type="text" readonly>
+    <div class="actions">
+      <button type="button" id="copy-btn">URLをコピー</button>
+      <a id="open-link" href="#" target="_blank" rel="noopener">新しいタブで開く</a>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "fishbowler-book-v1";
+
+    let book = {
+      title: "",
+      author: "",
+      ogImage: "images/cover.svg",
+      text: ""
+    };
+
+    let playlist = [];
+    let plainText = "";
+    let currentRange = null;
+    let viewMode = "full";
+
+    const els = {
+      authorPanel: document.getElementById("author-panel"),
+      readerPanel: document.getElementById("reader-panel"),
+      proseBody: document.getElementById("prose-body"),
+      readerView: document.getElementById("reader-view"),
+      authorText: document.getElementById("author-text"),
+      bookTitle: document.getElementById("book-title"),
+      bookAuthor: document.getElementById("book-author"),
+      bookImage: document.getElementById("book-image"),
+      previewImage: document.getElementById("preview-image"),
+      previewTitle: document.getElementById("preview-title"),
+      previewAuthor: document.getElementById("preview-author"),
+      headerTitle: document.getElementById("header-title"),
+      headerBook: document.getElementById("header-book"),
+      playlistItems: document.getElementById("playlist-items"),
+      shareBar: document.getElementById("share-bar"),
+      shareUrl: document.getElementById("share-url"),
+      copyBtn: document.getElementById("copy-btn"),
+      openLink: document.getElementById("open-link")
+    };
+
+    // ===== マークアップ =====
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function parseInlineMarkup(str) {
+      let s = escapeHtml(str);
+      s = s.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+      s = s.replace(/\{\{(.+?)\}\}/g, '<span class="bouten">$1</span>');
+      return s;
+    }
+
+    function textToParagraphsHtml(text) {
+      return text
+        .split(/\n\s*\n/)
+        .map(function (block) {
+          return block.trim();
+        })
+        .filter(Boolean)
+        .map(function (block) {
+          return "<p>" + parseInlineMarkup(block.replace(/\n/g, "")) + "</p>";
+        })
+        .join("");
+    }
+
+    function stripMarkup(text) {
+      return text.replace(/\*\*(.+?)\*\*/g, "$1").replace(/\{\{(.+?)\}\}/g, "$1");
+    }
+
+    function computePlainText(text) {
+      return tokenizeBlocks(text).plain;
+    }
+
+    function tokenizeBlocks(text) {
+      const blocks = text.split(/\n\s*\n/).map(function (b) { return b.trim(); }).filter(Boolean);
+      let plain = "";
+      const mapStart = [];
+
+      blocks.forEach(function (block, blockIndex) {
+        const tokenized = tokenizeBlock(block, blockIndex === 0 ? 0 : findBlockStart(text, block));
+        tokenized.mapStart.forEach(function (srcIndex) {
+          mapStart.push(srcIndex);
+        });
+        plain += tokenized.plain;
+      });
+
+      return { plain: plain, mapStart: mapStart };
+    }
+
+    function findBlockStart(fullText, block) {
+      return fullText.indexOf(block);
+    }
+
+    function tokenizeBlock(block, baseOffset) {
+      const mapStart = [];
+      let plain = "";
+      let i = 0;
+
+      while (i < block.length) {
+        if (block.startsWith("**", i)) { i += 2; continue; }
+        if (block.startsWith("{{", i)) { i += 2; continue; }
+        if (block.startsWith("}}", i)) { i += 2; continue; }
+        if (block[i] === "\n") { i += 1; continue; }
+
+        mapStart.push(baseOffset + i);
+        plain += block[i];
+        i += 1;
+      }
+
+      return { plain: plain, mapStart: mapStart };
+    }
+
+    function extractMarkupRange(text, start, end) {
+      const tokenized = tokenizeBlocks(text);
+      if (start >= end || end > tokenized.plain.length) return "";
+
+      let srcStart = tokenized.mapStart[start];
+      let srcEnd = tokenized.mapStart[end - 1] + 1;
+
+      if (srcStart >= 2 && text.slice(srcStart - 2, srcStart) === "**") srcStart -= 2;
+      if (srcStart >= 2 && text.slice(srcStart - 2, srcStart) === "{{") srcStart -= 2;
+
+      while (srcEnd < text.length) {
+        if (text.startsWith("**", srcEnd) || text.startsWith("}}", srcEnd)) {
+          srcEnd += 2;
+        } else {
+          break;
+        }
+      }
+
+      return text.slice(srcStart, srcEnd);
+    }
+
+    // ===== OGP メタ更新 =====
+    function absoluteImageUrl(path) {
+      if (!path) return "";
+      if (path.startsWith("http://") || path.startsWith("https://")) return path;
+      const base = location.href.replace(/[^/]*$/, "");
+      return base + path.replace(/^\//, "");
+    }
+
+    function updateMetaTags() {
+      document.title = book.title || "Fishbowler";
+      const imageUrl = absoluteImageUrl(book.ogImage);
+
+      const setMeta = function (selector, content) {
+        const el = document.querySelector(selector);
+        if (el) el.setAttribute("content", content);
+      };
+
+      setMeta('meta[property="og:title"]', book.title);
+      setMeta('meta[property="og:description"]', book.author);
+      setMeta('meta[property="og:image"]', imageUrl);
+      setMeta('meta[property="og:url"]', location.origin + location.pathname);
+      setMeta('meta[name="twitter:title"]', book.title);
+      setMeta('meta[name="twitter:description"]', book.author);
+      setMeta('meta[name="twitter:image"]', imageUrl);
+
+      els.headerTitle.textContent = book.title || "Fishbowler";
+      els.headerBook.textContent = book.author ? book.author + " 著" : "";
+      els.previewTitle.textContent = book.title || "著書名";
+      els.previewAuthor.textContent = book.author || "著者名";
+      els.previewImage.src = book.ogImage || "images/cover.jpg";
+    }
+
+    // ===== 描画 =====
+    function renderFullText() {
+      viewMode = "full";
+      els.readerView.classList.remove("playlist-mode");
+      els.proseBody.innerHTML = textToParagraphsHtml(book.text);
+      plainText = els.proseBody.textContent;
+    }
+
+    function renderPlaylist() {
+      if (playlist.length === 0) {
+        alert("プレイリストが空です。本文を選択して追加してください。");
+        return;
+      }
+      viewMode = "playlist";
+      els.readerView.classList.add("playlist-mode");
+
+      const html = playlist.map(function (item) {
+        const marked = extractMarkupRange(book.text, item.start, item.end);
+        const block = marked.replace(/\n/g, "");
+        return "<p>" + parseInlineMarkup(block) + "</p>";
+      }).join("");
+
+      els.proseBody.innerHTML = html;
+      plainText = els.proseBody.textContent;
+    }
+
+    function plainTextSlice(start, end) {
+      return computePlainText(book.text).slice(start, end);
+    }
+
+    // ===== オフセット（Reader 共有用） =====
+    function offsetFromStart(container, node, offset) {
+      const range = document.createRange();
+      range.selectNodeContents(container);
+      range.setEnd(node, offset);
+      return range.toString().length;
+    }
+
+    function locateOffset(container, targetOffset) {
+      const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+      let count = 0;
+      let node;
+      while ((node = walker.nextNode())) {
+        const len = node.textContent.length;
+        if (count + len >= targetOffset) {
+          return { node: node, offset: targetOffset - count };
+        }
+        count += len;
+      }
+      return null;
+    }
+
+    function createRangeFromOffsets(container, start, end) {
+      const s = locateOffset(container, start);
+      const e = locateOffset(container, end);
+      if (!s || !e) return null;
+      const range = document.createRange();
+      range.setStart(s.node, s.offset);
+      range.setEnd(e.node, e.offset);
+      return range;
+    }
+
+    function clearHighlights() {
+      els.proseBody.querySelectorAll("mark.shared-highlight").forEach(function (mark) {
+        const parent = mark.parentNode;
+        while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
+        parent.removeChild(mark);
+        parent.normalize();
+      });
+    }
+
+    function highlightRange(start, end) {
+      clearHighlights();
+      const range = createRangeFromOffsets(els.proseBody, start, end);
+      if (!range) return null;
+      const mark = document.createElement("mark");
+      mark.className = "shared-highlight";
+      try {
+        range.surroundContents(mark);
+      } catch (err) {
+        mark.appendChild(range.extractContents());
+        range.insertNode(mark);
+      }
+      return mark;
+    }
+
+    function buildShareUrl(params) {
+      const url = new URL(location.href.split("#")[0]);
+      url.search = "";
+      Object.keys(params).forEach(function (key) {
+        url.searchParams.set(key, params[key]);
+      });
+      return url.toString();
+    }
+
+    function showShareBar(url) {
+      els.shareUrl.value = url;
+      els.openLink.href = url;
+      els.shareBar.classList.add("visible");
+    }
+
+    function getSelectionOffsets() {
+      const sel = window.getSelection();
+      if (!sel || sel.isCollapsed || !sel.rangeCount) return null;
+      const range = sel.getRangeAt(0);
+      if (!els.proseBody.contains(range.commonAncestorContainer)) return null;
+      const text = sel.toString().trim();
+      if (!text) return null;
+
+      const start = offsetFromStart(els.proseBody, range.startContainer, range.startOffset);
+      const end = offsetFromStart(els.proseBody, range.endContainer, range.endOffset);
+      if (start >= end) return null;
+
+      const fullStart = mapViewOffsetToFull(start);
+      const fullEnd = mapViewOffsetToFull(end);
+      return { start: fullStart, end: fullEnd, viewStart: start, viewEnd: end };
+    }
+
+    function mapViewOffsetToFull(viewOffset) {
+      if (viewMode === "full") return viewOffset;
+      let accumulated = 0;
+      for (let i = 0; i < playlist.length; i++) {
+        const len = plainTextSlice(playlist[i].start, playlist[i].end).length;
+        if (viewOffset <= accumulated + len) {
+          return playlist[i].start + (viewOffset - accumulated);
+        }
+        accumulated += len;
+      }
+      return viewOffset;
+    }
+
+    // ===== プレイリスト =====
+    function renderPlaylistUi() {
+      els.playlistItems.innerHTML = "";
+      playlist.forEach(function (item, index) {
+        const li = document.createElement("li");
+        const snippet = document.createElement("span");
+        snippet.className = "snippet";
+        snippet.textContent = plainTextSlice(item.start, item.end).slice(0, 40) + "…";
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.textContent = "×";
+        removeBtn.title = "削除";
+        removeBtn.addEventListener("click", function () {
+          playlist.splice(index, 1);
+          saveLocal();
+          renderPlaylistUi();
+        });
+        li.appendChild(snippet);
+        li.appendChild(removeBtn);
+        els.playlistItems.appendChild(li);
+      });
+    }
+
+    function addToPlaylist(range) {
+      playlist.push({ start: range.start, end: range.end });
+      saveLocal();
+      renderPlaylistUi();
+    }
+
+    // ===== 保存 / 読込 =====
+    function saveLocal() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ book: book, playlist: playlist }));
+    }
+
+    function loadLocal() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return false;
+      try {
+        const data = JSON.parse(raw);
+        if (data.book) book = data.book;
+        if (data.playlist) playlist = data.playlist;
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    async function loadBookJson() {
+      try {
+        const res = await fetch("data/book.json");
+        if (!res.ok) return false;
+        const data = await res.json();
+        book = data;
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function applyBookToForm() {
+      els.bookTitle.value = book.title || "";
+      els.bookAuthor.value = book.author || "";
+      els.bookImage.value = book.ogImage || "";
+      els.authorText.value = book.text || "";
+      updateMetaTags();
+    }
+
+    function applyFormToBook() {
+      book.title = els.bookTitle.value.trim();
+      book.author = els.bookAuthor.value.trim();
+      book.ogImage = els.bookImage.value.trim() || "images/cover.jpg";
+      book.text = els.authorText.value;
+      updateMetaTags();
+    }
+
+    // ===== URL パラメータ =====
+    function applyUrlParams() {
+      const params = new URLSearchParams(location.search);
+
+      if (params.has("pl")) {
+        const ids = params.get("pl").split(",").map(Number).filter(function (n) { return !isNaN(n); });
+        if (ids.length >= 2 && ids.length % 2 === 0) {
+          playlist = [];
+          for (let i = 0; i < ids.length; i += 2) {
+            playlist.push({ start: ids[i], end: ids[i + 1] });
+          }
+          renderPlaylist();
+          renderPlaylistUi();
+          showShareBar(buildShareUrl({ pl: params.get("pl") }));
+          return;
+        }
+      }
+
+      if (params.has("sel")) {
+        const parts = params.get("sel").split("-");
+        if (parts.length === 2) {
+          const start = parseInt(parts[0], 10);
+          const end = parseInt(parts[1], 10);
+          if (!isNaN(start) && !isNaN(end) && start < end) {
+            renderFullText();
+            currentRange = { start: start, end: end };
+            const mark = highlightRange(start, end);
+            showShareBar(buildShareUrl({ sel: start + "-" + end }));
+            if (mark) {
+              setTimeout(function () {
+                mark.scrollIntoView({ behavior: "smooth", block: "center" });
+              }, 120);
+            } else {
+              const pt = locateOffset(els.proseBody, start);
+              if (pt) pt.node.parentElement.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+            window.getSelection().removeAllRanges();
+          }
+        }
+      }
+    }
+
+    // ===== モード切替 =====
+    document.querySelectorAll("#mode-tabs button").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        document.querySelectorAll("#mode-tabs button").forEach(function (b) {
+          b.classList.remove("active");
+        });
+        btn.classList.add("active");
+        const mode = btn.getAttribute("data-mode");
+        els.authorPanel.classList.toggle("active", mode === "author");
+        els.readerPanel.classList.toggle("active", mode === "reader");
+        if (mode === "author") applyBookToForm();
+      });
+    });
+
+    // ===== Author ツール =====
+    function wrapSelection(before, after) {
+      const ta = els.authorText;
+      const start = ta.selectionStart;
+      const end = ta.selectionEnd;
+      const val = ta.value;
+      const selected = val.slice(start, end) || "テキスト";
+      ta.value = val.slice(0, start) + before + selected + after + val.slice(end);
+      ta.focus();
+      ta.setSelectionRange(start + before.length, start + before.length + selected.length);
+    }
+
+    document.getElementById("cmd-bold").addEventListener("click", function () {
+      wrapSelection("**", "**");
+    });
+
+    document.getElementById("cmd-bouten").addEventListener("click", function () {
+      wrapSelection("{{", "}}");
+    });
+
+    document.getElementById("cmd-import").addEventListener("click", function () {
+      document.getElementById("file-import").click();
+    });
+
+    document.getElementById("file-import").addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (ev) {
+        if (file.name.endsWith(".json")) {
+          try {
+            const data = JSON.parse(ev.target.result);
+            if (data.text) book.text = data.text;
+            if (data.title) book.title = data.title;
+            if (data.author) book.author = data.author;
+            if (data.ogImage) book.ogImage = data.ogImage;
+            applyBookToForm();
+          } catch (err) {
+            alert("JSON の読み込みに失敗しました");
+          }
+        } else {
+          els.authorText.value = ev.target.result;
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = "";
+    });
+
+    document.getElementById("btn-save").addEventListener("click", function () {
+      applyFormToBook();
+      saveLocal();
+      renderFullText();
+      renderPlaylistUi();
+      alert("保存しました。GitHub で公開する場合は book.json か index.html をアップロードしてください。");
+    });
+
+    document.getElementById("btn-export-json").addEventListener("click", function () {
+      applyFormToBook();
+      const blob = new Blob([JSON.stringify(book, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "book.json";
+      a.click();
+    });
+
+    document.getElementById("btn-export-html").addEventListener("click", function () {
+      applyFormToBook();
+      let html = document.documentElement.outerHTML;
+      const imageUrl = absoluteImageUrl(book.ogImage);
+      html = html.replace(/<title>[^<]*<\/title>/, "<title>" + escapeHtml(book.title) + "</title>");
+      html = html.replace(/content="平原について"/g, 'content="' + escapeHtml(book.title) + '"');
+      html = html.replace(/content="（著者名を入力）"/g, 'content="' + escapeHtml(book.author) + '"');
+      html = html.replace(/content="images\/cover\.jpg"/g, 'content="' + imageUrl + '"');
+      const blob = new Blob(["<!DOCTYPE html>\n" + html], { type: "text/html" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "index.html";
+      a.click();
+    });
+
+    [els.bookTitle, els.bookAuthor, els.bookImage].forEach(function (input) {
+      input.addEventListener("input", function () {
+        book.title = els.bookTitle.value.trim();
+        book.author = els.bookAuthor.value.trim();
+        book.ogImage = els.bookImage.value.trim() || "images/cover.jpg";
+        updateMetaTags();
+      });
+    });
+
+    // ===== Reader =====
+    document.getElementById("btn-show-full").addEventListener("click", renderFullText);
+    document.getElementById("btn-show-playlist").addEventListener("click", renderPlaylist);
+
+    document.getElementById("btn-add-playlist").addEventListener("click", function () {
+      const range = getSelectionOffsets();
+      if (!range) {
+        alert("本文の範囲を選択してください。");
+        return;
+      }
+      addToPlaylist(range);
+      alert("プレイリストに追加しました。");
+    });
+
+    document.getElementById("btn-clear-playlist").addEventListener("click", function () {
+      playlist = [];
+      saveLocal();
+      renderPlaylistUi();
+    });
+
+    document.getElementById("btn-share-playlist").addEventListener("click", function () {
+      if (playlist.length === 0) {
+        alert("プレイリストが空です。");
+        return;
+      }
+      const pl = playlist.map(function (item) {
+        return item.start + "," + item.end;
+      }).join(",");
+      const url = buildShareUrl({ pl: pl });
+      navigator.clipboard.writeText(url).catch(function () {
+        prompt("URLをコピー:", url);
+      });
+      showShareBar(url);
+    });
+
+    document.addEventListener("mouseup", function () {
+      setTimeout(function () {
+        const range = getSelectionOffsets();
+        if (!range) return;
+        currentRange = range;
+        const url = buildShareUrl({ sel: range.start + "-" + range.end });
+        showShareBar(url);
+        history.replaceState(null, "", "?sel=" + range.start + "-" + range.end);
+      }, 10);
+    });
+
+    els.copyBtn.addEventListener("click", function () {
+      navigator.clipboard.writeText(els.shareUrl.value).then(function () {
+        els.copyBtn.textContent = "コピーしました";
+        setTimeout(function () { els.copyBtn.textContent = "URLをコピー"; }, 2000);
+      }).catch(function () {
+        prompt("URLをコピー:", els.shareUrl.value);
+      });
+    });
+
+    // ===== 初期化 =====
+    (async function init() {
+      const hasLocal = loadLocal();
+      if (!hasLocal) await loadBookJson();
+      applyBookToForm();
+      renderFullText();
+      renderPlaylistUi();
+      applyUrlParams();
+    })();
+  </script>
+
+</body>
+</html>
